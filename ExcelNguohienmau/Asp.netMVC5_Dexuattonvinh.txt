@@ -1,0 +1,4 @@
+- Xử lý import cá nhân
+
+- Đọc file excel cá nhân => đưa bảng đề xuất =>xuất file
+Điều kiện Họ tên và Năm sinh 
