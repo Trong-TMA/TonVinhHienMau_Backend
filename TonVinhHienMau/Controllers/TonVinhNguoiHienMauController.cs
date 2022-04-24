@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using TonVinhHienMau.Data;
 using TonVinhHienMau.Models;
@@ -322,10 +325,108 @@ namespace TonVinhHienMau.Controllers
             return new JsonResult(list_result);
         }
 
-        [HttpGet("ExportHonor")]
+        [HttpPost("ExportHonor")]
         public IActionResult ExportHonor(List<NguoiHienMauVm> list_result)
         {
-            return Ok();
+            var stream = new MemoryStream();
+            using (var xlPackage = new ExcelPackage(stream))
+            {
+                var worksheet = xlPackage.Workbook.Worksheets.Add("TonVinhHienMau");
+                var namedStyle = xlPackage.Workbook.Styles.CreateNamedStyle("HyperLink");
+                namedStyle.Style.Font.UnderLine = true;
+                namedStyle.Style.Font.Color.SetColor(Color.Blue);
+                const int startRow = 5;
+                var row = startRow;
+
+                //Create Headers and format them
+                worksheet.Cells["A1:D1"].Value = "UBND TỈNH BÌNH ĐỊNH";
+                worksheet.Cells["A1:D1"].Merge = true;
+                worksheet.Cells["A1:D1"].Style.Font.Bold = true;
+                worksheet.Cells["A1:D1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+
+                worksheet.Cells["A2:D2"].Value = "BCĐ VĐ HIẾN MÁU TÌNH NGUYỆN TỈNH";
+                worksheet.Cells["A2:D2"].Merge = true;
+                worksheet.Cells["A2:D2"].Style.Font.Bold = true;
+                worksheet.Cells["A2:D2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+
+                worksheet.Cells["A3:S3"].Value = "DANH SÁCH CÁ NHÂN HIẾN MÁU TÌNH NGUYỆN 5 LẦN TRỞ LÊN CHƯA ĐƯỢC TÔN VINH TỈNH BÌNH ĐỊNH NĂM ..." +"\n"+
+                    "(Căn cứ theo Quy chế Tôn vinh, khen thưởng cá nhân, tập thể có thành tích Hiến máu tình nguyện và vận động hiến máu tình nguyện tại Quyết định số 122/QĐ-BCĐQG ngày ... tháng ... năm ... của Ban Chỉ đạo quốc gia vận động hiến máu tình nguyện)";
+                worksheet.Cells["A3:S3"].Merge = true;
+                worksheet.Cells["A3:S3"].Style.Font.Bold = true;
+                worksheet.Cells["A3:S3"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+
+                worksheet.Cells["E1:G1"].Value = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM";
+                worksheet.Cells["E1:G1"].Merge = true;
+                worksheet.Cells["E1:G1"].Style.Font.Bold = true;
+                worksheet.Cells["E1:G1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+
+                worksheet.Cells["E2:G2"].Value = "Độc lập - Tự do - Hạnh phúc";
+                worksheet.Cells["E2:G2"].Merge = true;
+                worksheet.Cells["E2:G2"].Style.Font.Bold = true;
+                worksheet.Cells["E2:G2"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.CenterContinuous;
+
+                worksheet.Cells["A4"].Value = "STT";
+                worksheet.Cells["B4"].Value = "Họ tên";
+                worksheet.Cells["C4"].Value = "Giới tính";
+                worksheet.Cells["D4"].Value = "Năm Sinh";
+                worksheet.Cells["E4"].Value = "Nghề Nghiệp";
+                worksheet.Cells["F4"].Value = "Địa chỉ";
+                worksheet.Cells["G4"].Value = "5 Lần";
+                worksheet.Cells["H4"].Value = "10 Lần";
+                worksheet.Cells["I4"].Value = "15 Lần";
+                worksheet.Cells["J4"].Value = "20 Lần";
+                worksheet.Cells["K4"].Value = "30 Lần";
+                worksheet.Cells["L4"].Value = "40 Lần";
+                worksheet.Cells["M4"].Value = "50 Lần";
+                worksheet.Cells["N4"].Value = "60 Lần";
+                worksheet.Cells["O4"].Value = "70 Lần";
+                worksheet.Cells["P4"].Value = "80 Lần";
+                worksheet.Cells["Q4"].Value = "90 Lần";
+                worksheet.Cells["R4"].Value = "100 Lần";
+                worksheet.Cells["S4"].Value = "Lưu ý";
+                
+
+                worksheet.Cells["A4:F4"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells["A4:F4"].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(184, 204, 228));
+                worksheet.Cells["A4:F4"].Style.Font.Bold = true;
+
+                row = 5;
+                int count =  0;
+                foreach (var item in list_result)
+                {
+                    worksheet.Cells[row, 1].Value = count + 1;
+                    worksheet.Cells[row, 2].Value = item.HoTen;
+                    worksheet.Cells[row, 3].Value = item.GioiTinh;
+                    worksheet.Cells[row, 4].Value = item.NamSinh;
+                    worksheet.Cells[row, 5].Value = item.NgheNghiep;
+                    worksheet.Cells[row, 6].Value = item.DiaChi;
+                    worksheet.Cells[row, 7].Value = item.TV_5;
+                    worksheet.Cells[row, 8].Value = item.TV_10;
+                    worksheet.Cells[row, 9].Value = item.TV_15;
+                    worksheet.Cells[row, 10].Value = item.TV_20;
+                    worksheet.Cells[row, 11].Value = item.TV_30;
+                    worksheet.Cells[row, 12].Value = item.TV_40;
+                    worksheet.Cells[row, 13].Value = item.TV_50;
+                    worksheet.Cells[row, 14].Value = item.TV_60;
+                    worksheet.Cells[row, 15].Value = item.TV_70;
+                    worksheet.Cells[row, 16].Value = item.TV_80;
+                    worksheet.Cells[row, 17].Value = item.TV_90;
+                    worksheet.Cells[row, 18].Value = item.TV_100;
+                    worksheet.Cells[row, 19].Value = item.Note;
+
+                    row++;
+                }
+
+                // set some core property values
+                xlPackage.Workbook.Properties.Title = "Danh sách người hiến máu";
+               /* xlPackage.Workbook.Properties.Author = "Mohamad Lawand";
+                xlPackage.Workbook.Properties.Subject = "User List";*/
+                // save the new spreadsheet
+                xlPackage.Save();
+                // Response.Clear();
+            }
+            stream.Position = 0;
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TonVinhHienMau.xlsx");
         }
     }
 }
