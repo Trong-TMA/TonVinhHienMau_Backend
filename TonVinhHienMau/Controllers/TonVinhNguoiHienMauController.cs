@@ -325,7 +325,7 @@ namespace TonVinhHienMau.Controllers
         [HttpGet("ExportHonor")]
         public IActionResult ExportHonor(List<NguoiHienMauVm> list_result)
         {
-
+            return Ok();
         }
     }
 }
